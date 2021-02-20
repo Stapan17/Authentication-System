@@ -1,0 +1,12 @@
+<h1>Register</h1>
+
+<form action="" method="POST" enctype="multipart/form-data">
+
+    {% csrf_token %}
+
+    {{user_info_form.as_p}}
+    {{user_form.as_p}}
+
+    <input type="submit" value="Submit">
+
+</form>
