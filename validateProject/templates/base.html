@@ -13,7 +13,8 @@
 
     {% if registered %}
 
-    <h1>Hello, Welcome {{user.username}} </h1>
+    <h1>Hello, Welcome {{user.username}} </h1> <br>
+    <h1> {{ user.id }} </h1>
     <a href="{% url 'logout' %}">Logout</a>
 
     {% else %}

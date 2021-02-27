@@ -1,15 +1,29 @@
 from django.shortcuts import render, redirect
 from .models import User, infoUser
-from .forms import infoUserForm, UserForm
+from .forms import infoUserForm, UserForm, infoUserUpdateForm
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.views import generic
+from django.urls import reverse_lazy
 
 
 def home(request):
     registered = False
     context = {'registered': registered}
     return render(request, 'base.html', context)
+
+
+@login_required(login_url='log')
+def index(request):
+    registered = True
+
+    current_user = request.user
+    current_user_info = infoUser.objects.get(user_id=current_user.id)
+
+    context = {'registered': registered, 'current_user': current_user,
+               'current_user_info': current_user_info}
+    return render(request, 'index.html', context)
 
 
 def reg(request):
@@ -27,9 +41,7 @@ def reg(request):
             user_info.user = user
             user_info.save()
 
-            registered = True
-            context = {'registered': registered, 'user': user}
-            return render(request, 'base.html', context)
+            return redirect('index')
 
         else:
             registered = False
@@ -59,9 +71,7 @@ def log(request):
 
         if user:
             login(request, user)
-            registered = True
-            context = {'registered': registered}
-            return render(request, 'base.html', context)
+            return redirect('index')
 
         else:
             return redirect('log')
@@ -75,3 +85,28 @@ def log_out(request):
     registered = False
     context = {'registered': registered}
     return render(request, 'base.html', context)
+
+
+def update(request, pk):
+
+    Object = infoUser.objects.get(user_id=pk)
+    user_info_form = infoUserUpdateForm(instance=Object)
+
+    if request.POST:
+        form = infoUserUpdateForm(
+            request.POST, request.FILES, instance=Object)
+
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.save()
+
+            user_info_form = obj
+
+            return redirect('index')
+
+    form = infoUserUpdateForm(
+        instance=Object
+    )
+
+    context = {'form': form, 'Object': Object}
+    return render(request, 'update.html', context)
